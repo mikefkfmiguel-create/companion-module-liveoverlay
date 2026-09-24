@@ -58,9 +58,31 @@ eventos (`/api/eventos`, Server-Sent Events): o estado chega a cada
 mudança, e é por isso que os botões acompanham sem andar a perguntar de
 segundo a segundo. Se a ligação cair, tenta outra vez de 4 em 4 segundos.
 
-## Instalar como módulo de programador
+## Instalar
 
-1. Clonar este repositório e correr `npm install`.
-2. No Companion, em **Settings → Developer modules path**, apontar para a
-   pasta onde está o repositório.
-3. O módulo aparece na lista como **Live Overlay Engine**.
+**Pelo pacote (o caminho normal).** Descarrega o `liveoverlay-1.0.0.tgz`
+da [página da app](https://things-on.mike-app.com/liveoverlay.html) e, no
+Companion, em **Modules**, usa **Import module package**. O Companion
+trata do resto.
+
+**Como módulo de programador** (para mexer no código): clona este
+repositório, corre `npm install`, e em **Settings → Developer modules
+path** aponta para a pasta *de cima* (a que contém esta).
+
+## Gerar o pacote
+
+`npx companion-module-build` é o caminho oficial, mas nesta máquina o
+Windows bloqueia o PowerShell que a ferramenta usa para chamar o webpack.
+Quando isso acontece, corre-se o webpack à mão e monta-se o pacote:
+
+```bash
+node node_modules/webpack/bin/webpack.js   -c node_modules/@companion-module/tools/webpack.config.cjs   --env ROOT=<esta pasta> --env MODULETYPE=connection
+```
+
+Depois junta-se `pkg/main.js`, `pkg/package.json` e
+`pkg/companion/manifest.json` (com `runtime.entrypoint` em `../main.js`,
+`runtime.api` em `nodejs-ipc` e `runtime.apiVersion` na versão do
+`@companion-module/base`) num `.tgz` com a pasta `pkg` à cabeça.
+
+A base fica na **1.x** de propósito: o Companion 5 corre-a bem (é o que os
+módulos instalados usam) e a 2.x mudou o arranque do módulo.
