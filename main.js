@@ -63,7 +63,7 @@ class LiveOverlayInstance extends InstanceBase {
 				id: 'porta',
 				label: 'Porta',
 				width: 3,
-				default: 8770,
+				default: 8790,
 				min: 1,
 				max: 65535,
 			},
@@ -80,7 +80,7 @@ class LiveOverlayInstance extends InstanceBase {
 	// ------------------------------------------------------------ ligação
 	url(caminho) {
 		const host = this.config?.host || '127.0.0.1'
-		const porta = this.config?.porta || 8770
+		const porta = this.config?.porta || 8790
 		return `http://${host}:${porta}${caminho}`
 	}
 
@@ -176,9 +176,16 @@ class LiveOverlayInstance extends InstanceBase {
 		this.estado = { ...this.estado, ...estado }
 		const nomesDepois = (this.estado.presets || []).map((p) => p.nome).join('|')
 
-		// A lista de presets muda quando o operador guarda ou apaga um:
-		// as escolhas das ações têm de acompanhar.
-		if (nomesAntes !== nomesDepois) this.definirAcoes()
+		// A lista de presets muda quando o operador guarda ou apaga um: as
+		// escolhas têm de acompanhar. Os feedbacks também — quando o módulo
+		// arranca a app ainda não respondeu, e sem isto a lista de presets do
+		// feedback ficava vazia para sempre. Os botões já feitos são um por
+		// preset, por isso refazem-se com a lista nova.
+		if (nomesAntes !== nomesDepois) {
+			this.definirAcoes()
+			this.definirFeedbacks()
+			this.definirBotoesFeitos()
+		}
 
 		this.setVariableValues({
 			preset_no_ar: this.estado.noAr ? this.estado.presetAtivo : '',
@@ -337,21 +344,39 @@ class LiveOverlayInstance extends InstanceBase {
 		])
 	}
 
-	// Botões já feitos, para não se começar de uma folha em branco.
+	// Botões já feitos, para não se começar de uma folha em branco. Os dos
+	// presets nascem da lista que a app manda: um botão por preset, já com a
+	// ação e o feedback presos ao nome. Arrasta-se e está pronto — o botão
+	// acende sozinho quando aquele preset está no ar.
 	definirBotoesFeitos() {
 		const estilo = { size: '14', color: 0xffffff, bgcolor: 0x1a1a1a }
-		this.setPresetDefinitions({
+		const noAr = { bgcolor: 0xc0392b, color: 0xffffff }
+		const botoes = {}
+
+		for (const preset of this.estado.presets || []) {
+			const nome = preset.nome
+			botoes[`preset_${nome}`] = {
+				type: 'button',
+				category: 'Presets',
+				name: nome,
+				style: { ...estilo, text: nome },
+				steps: [{ down: [{ actionId: 'preset_toggle', options: { nome } }], up: [] }],
+				feedbacks: [{ feedbackId: 'preset_no_ar', options: { nome }, style: { ...noAr } }],
+			}
+		}
+
+		Object.assign(botoes, {
 			alternar_preset: {
 				type: 'button',
 				category: 'Presets',
-				name: 'Alternar um preset',
+				name: 'Alternar um preset (escolher qual)',
 				style: { ...estilo, text: 'PRESET' },
 				steps: [{ down: [{ actionId: 'preset_toggle', options: { nome: '' } }], up: [] }],
 				feedbacks: [
 					{
 						feedbackId: 'preset_no_ar',
 						options: { nome: '' },
-						style: { bgcolor: 0xc0392b, color: 0xffffff },
+						style: { ...noAr },
 					},
 				],
 			},
@@ -384,6 +409,8 @@ class LiveOverlayInstance extends InstanceBase {
 				feedbacks: [],
 			},
 		})
+
+		this.setPresetDefinitions(botoes)
 	}
 }
 

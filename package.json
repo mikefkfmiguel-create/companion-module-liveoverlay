@@ -1,18 +1,15 @@
 {
-  "name": "companion-module-liveoverlay",
-  "version": "1.0.0",
-  "type": "module",
-  "main": "main.js",
-  "license": "MIT",
-  "description": "Comanda os presets do Live Overlay Engine a partir do Companion",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mikefkfmiguel-create/companion-module-liveoverlay.git"
-  },
-  "scripts": {
-    "dev": "node main.js"
-  },
-  "dependencies": {
-    "@companion-module/base": "~1.11.0"
-  }
+	"name": "companion-module-liveoverlay",
+	"version": "1.0.2",
+	"type": "module",
+	"main": "main.js",
+	"license": "MIT",
+	"description": "Comanda os presets do Live Overlay Engine a partir do Companion",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/mikefkfmiguel-create/companion-module-liveoverlay.git"
+	},
+	"dependencies": {
+		"@companion-module/base": "~1.11.0"
+	}
 }
