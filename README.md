@@ -7,7 +7,7 @@ acendem sozinhos conforme o que está a sair.
 ## Antes de começar
 
 Na app, na janela **Comando**, secção **Comando à distância**: ali está a
-porta (8770 por omissão) e o **código de ligação**. Sem o código não se
+porta (8790 por omissão) e o **código de ligação**. Sem o código não se
 liga — é o que impede uma máquina qualquer da rede do evento de mandar
 grafismo para o ar por engano.
 
@@ -18,7 +18,7 @@ Na instância do Companion:
 | Campo | O que pôr |
 |---|---|
 | Endereço da máquina | O IP do PC onde corre o Live Overlay Engine (`127.0.0.1` se for o mesmo) |
-| Porta | 8770 |
+| Porta | 8790 |
 | Código de ligação | O código que a app mostra |
 
 Se a app ainda não estiver aberta, o módulo fica a tentar sozinho — não é
@@ -58,9 +58,48 @@ eventos (`/api/eventos`, Server-Sent Events): o estado chega a cada
 mudança, e é por isso que os botões acompanham sem andar a perguntar de
 segundo a segundo. Se a ligação cair, tenta outra vez de 4 em 4 segundos.
 
-## Instalar como módulo de programador
+## Instalar
 
-1. Clonar este repositório e correr `npm install`.
-2. No Companion, em **Settings → Developer modules path**, apontar para a
-   pasta onde está o repositório.
-3. O módulo aparece na lista como **Live Overlay Engine**.
+**Pelo zip (o caminho normal).** Descarrega o `liveoverlay-companion-*.zip`
+da [página da app](https://things-on.mike-app.com/liveoverlay.html),
+descompacta e corre o **`Instalar_Modulo_Companion.bat`**. Põe o módulo em
+`%LOCALAPPDATA%\MikeAppsCompanion\live-overlay` e diz o resto: no
+Companion, em **Settings → Developer modules path**, aponta-se para a
+pasta `MikeAppsCompanion` e reinicia-se o Companion por completo.
+
+O caminho é fixo de propósito. O Companion só aceita **um** developer
+modules path, e os módulos das apps do Mike (este, o do Cue Timer, o do
+Cue4All) partilham a pasta `MikeAppsCompanion`, cada um na sua subpasta —
+o `.bat` só mexe na sua.
+
+**Como módulo de programador** (para mexer no código): clonar este
+repositório, correr `npm install` e apontar o developer modules path para
+a pasta *de cima* (a que contém esta).
+
+## Empacotar para o site
+
+O zip que se publica não é este repositório tal e qual: tem o `.bat` à
+cabeça e o módulo dentro de uma pasta chamada `companion-plugins`, que é o
+nome que o `.bat` procura.
+
+```
+Instalar_Modulo_Companion.bat      <- instalador/Instalar_Modulo_Companion.bat
+companion-plugins/main.js
+companion-plugins/package.json
+companion-plugins/package-lock.json
+companion-plugins/companion/manifest.json
+companion-plugins/node_modules/    <- o resultado de `npm install`
+```
+
+O `node_modules` vai dentro: quem instala não tem Node nem corre nada, o
+módulo tem de vir pronto.
+
+Ao subir a versão, mudar **os dois** sítios — `package.json` e
+`companion/manifest.json` — e confirmar que a porta no `main.js` e a que o
+`.bat` menciona no fim são a mesma (hoje **8790**; eram 8770 até chocarem
+com o mkmonitor em `127.0.0.1`).
+
+`npx companion-module-build` (o `.tgz` para **Import module package**) foi
+tentado e deixou-se de lado: nesta máquina o Windows bloqueia o PowerShell
+que a ferramenta usa para chamar o webpack, e o zip com o `.bat` instala
+igual sem depender disso.
